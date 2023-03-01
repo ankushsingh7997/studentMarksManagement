@@ -8,11 +8,11 @@ userId:{
 roll:{type:Number,unique:true,required:true},
 studentName:{type:String,required:true},
 subjects:{
-    java:{type:Number,default:null},
-    javaScript:{type:Number,default:null},
-    mongoDb:{type:Number,default:null},
-    python:{type:Number,default:null},
-    sql:{type:Number,default:null},
+    java:{type:Number},
+    javaScript:{type:Number},
+    mongoDb:{type:Number},
+    python:{type:Number},
+    sql:{type:Number},
 },
 isDeleted:{type:Boolean,default:false}
 
