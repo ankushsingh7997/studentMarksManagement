@@ -304,14 +304,18 @@ const view=async (req,res)=>{
     if(findData.length==0) return res.status(404).send({status:false,message:"No data found "})
       
     return res.status(200).send({status:true,data:findData})
-    
-    
 
-    
+}
 
+const deleteStudent=async(req,res)=>{
+let {userId,roll}=req.params;
+if(!roll) return res.status(400).send({status:false,message:"please provid roll"})
+if(!Number(roll)) return res.status(400).send({status:false,message:"please provid valid roll"})
+let deletestudent=await dataModel.findOneAndUpdate({userId:userId,roll,isDeleted:false},{isDeleted:true},{new:true})
 
-
+if(!deletestudent) return res.status(404).send({status:false,message:"no student found"})
+return res.status(200).send({status:false,message:"student deleted successfully"})
 
 
 }
-module.exports={createData,editData,view}
+module.exports={createData,editData,view,deleteStudent}
