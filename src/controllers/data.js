@@ -275,10 +275,43 @@ const editData=async (req,res)=>{
 
 
 }
-const view=async ()=>{
+const view=async (req,res)=>{
+    const{name,subject}=req.query
+    
+    if(Object.keys(req.query).length==0) return res.status(400).send({status:false,message:"please pass something"})
+    let findData;
+    if(name){
+         findData=await dataModel.find({studentName:name,isDeleted:false}).select({roll:1,studentName:1,subjects:1,_id:0})
+        
+        
+
+        
+    }
+    else if(subject){
+         findData=await dataModel.find({isDeleted:false}).select({roll:1,subjects:1,studentName:1,_id:0})
+         let result=[]
+         for(i in findData)
+         {
+            if(findData[i].subjects[subject]||findData[i].subjects[subject]==0)
+            {
+                result.push(findData[i])
+            } 
+         }
+         findData=result
+
+       
+    }
+    if(findData.length==0) return res.status(404).send({status:false,message:"No data found "})
+      
+    return res.status(200).send({status:true,data:findData})
+    
+    
+
+    
+
 
 
 
 
 }
-module.exports={createData,editData}
+module.exports={createData,editData,view}
