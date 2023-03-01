@@ -4,6 +4,7 @@ const {isValidObjectId}=require('mongoose')
 const { isValidName } = require('../validations/validations.js')
 
 const createData=async (req,res)=>{
+    try{
     let data=req.body
     if(Object.keys(data).length==0) return res.status(400).send({status:false,message:"please provide fields"})
     let object={}
@@ -174,25 +175,20 @@ if(data.java)
 
 
      createData=await dataModel.findOneAndUpdate({roll:data.roll},object,{new:true})
-
-
-
 }
-   
-   
-   
-
-
-
-
-
 
     return res.status(200).send({status:true,message:"data uploaded seccessfully",data:createData})
 
-
+    }
+    catch(err)
+    {
+        return res.status(500).send({status:false,message:err.message})
+    }
 
 }
 const editData=async (req,res)=>{
+try{
+
     let data=req.body;
     let userId=req.params.userId
     let obj={}
@@ -207,7 +203,7 @@ const editData=async (req,res)=>{
         data.studentName=data.studentName.trim()
         if(data.studentName=='')return res.status(400).send({status:false,message:"studentName field cannot be empty"})
         if(!isValidName(data.studentName)) return res.status(400).send({status:false,message:"pass valid studentName"})
-        obj.studentName=data.studentName
+        obj.studentName=data.studentName.toLowerCase()
     }
    
     if(data.subjects)
@@ -261,6 +257,7 @@ const editData=async (req,res)=>{
             }
     
         }
+        
 
 
 
@@ -271,16 +268,22 @@ const editData=async (req,res)=>{
 
     return res.status(200).send({status:true,message:'updated successfully',data:update})
 
-
+}
+catch(err)
+    {
+        return res.status(500).send({status:false,message:err.message})
+    }
 
 
 }
 const view=async (req,res)=>{
-    const{name,subject}=req.query
+    try{
+    let{name,subject}=req.query
     
     if(Object.keys(req.query).length==0) return res.status(400).send({status:false,message:"please pass something"})
     let findData;
     if(name){
+        name=name.toLowerCase();
          findData=await dataModel.find({studentName:name,isDeleted:false}).select({roll:1,studentName:1,subjects:1,_id:0})
         
         
@@ -294,7 +297,8 @@ const view=async (req,res)=>{
          {
             if(findData[i].subjects[subject]||findData[i].subjects[subject]==0)
             {
-                result.push(findData[i])
+                let subjecT=findData[i].subjects[subject]
+                result.push({studentName:findData[i].studentName,[subject]:subjecT})
             } 
          }
          findData=result
@@ -304,10 +308,15 @@ const view=async (req,res)=>{
     if(findData.length==0) return res.status(404).send({status:false,message:"No data found "})
       
     return res.status(200).send({status:true,data:findData})
-
+    }
+    catch(err)
+    {
+        return res.status(500).send({status:false,message:err.message})
+    }
 }
 
 const deleteStudent=async(req,res)=>{
+    try{
 let {userId,roll}=req.params;
 if(!roll) return res.status(400).send({status:false,message:"please provid roll"})
 if(!Number(roll)) return res.status(400).send({status:false,message:"please provid valid roll"})
@@ -315,7 +324,29 @@ let deletestudent=await dataModel.findOneAndUpdate({userId:userId,roll,isDeleted
 
 if(!deletestudent) return res.status(404).send({status:false,message:"no student found"})
 return res.status(200).send({status:false,message:"student deleted successfully"})
+    }
+    catch(err)
+    {
+        return res.status(500).send({status:false,message:err.message})
+    }
 
 
 }
-module.exports={createData,editData,view,deleteStudent}
+const fetchData=async(req,res)=>{
+
+try{
+    let userId=req.params.userId;
+     let data=await dataModel.find({userId:userId,isDeleted:false})
+     if(data.length==0) return res.status(404).send({status:false,message:'no data available'})
+     return res.status(200).send({status:true,message:"success",data:data})
+
+
+}
+catch(err)
+    {
+        return res.status(500).send({status:false,message:err.message})
+    }
+
+
+}
+module.exports={createData,editData,view,deleteStudent,fetchData}

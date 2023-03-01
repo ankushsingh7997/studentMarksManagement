@@ -7,6 +7,7 @@ const jwt=require('jsonwebtoken')
 
 const register=async (req,res)=>
 {
+    try{
     let {name,email,password}=req.body;
     let admin={}
     // name field---------------------
@@ -16,7 +17,7 @@ const register=async (req,res)=>
         name=name.trim()
         if(name=='')return res.status(400).send({status:false,message:"name field cannot be empty"})
         if(!isValidName(name)) return res.status(400).send({status:false,message:"pass valid name"})
-        admin.name=name;
+        admin.name=name.toLowerCase();
     }
     // email field-------------------------
 
@@ -48,6 +49,11 @@ const register=async (req,res)=>
 
   let createAdmin= await adminModel.create(admin)
   return res.status(200).send({status:true,message:"registered successfully",data:createAdmin})
+}
+catch(err)
+    {
+        return res.status(500).send({status:false,message:err.message})
+    }
     
 }
 // login
