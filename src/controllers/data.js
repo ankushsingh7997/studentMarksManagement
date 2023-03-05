@@ -48,7 +48,7 @@ object.roll=data.roll
 //subjects
 if(data.java)
     {
-        if(typeof Number(data.java)!='number')
+        if(!Number(data.java)&& data.java!=0)
         return res.status(400).send({status:false,message:"provide valid marks"})
         if(data.java<0)  return res.status(400).send({status:false,message:"provide valid marks for java"})
         
@@ -56,7 +56,7 @@ if(data.java)
     }
     if(data.javaScript)
     {
-        if(typeof Number(data.javaScript)!='number')
+        if(!Number(data.javaScript)&& data.javaScript!=0)
         return res.status(400).send({status:false,message:"provide valid marks"})
         if(data.javaScript<0)  return res.status(400).send({status:false,message:"provide valid marks for javaScript"})
         subjects.javaScript=data.javaScript
@@ -64,7 +64,7 @@ if(data.java)
     }
     if(data.mongoDb)
     {
-        if(typeof Number(data.mongoDb)!='number')
+        if(!Number(data.mongoDb)&& data.mongoDb!=0)
         return res.status(400).send({status:false,message:"provide valid marks"})
         if(data.mongoDb<0)  return res.status(400).send({status:false,message:"provide valid marks for mongoDb"})
         subjects.mongoDb=data.mongoDb
@@ -72,7 +72,7 @@ if(data.java)
     }
     if(data.python)
     {
-        if(typeof Number(data.python)!='number')
+        if(!Number(data.python)&& data.python!=0)
         return res.status(400).send({status:false,message:"provide valid marks"})
         if(data.python<0)  return res.status(400).send({status:false,message:"provide valid marks for python"})
         subjects.python=data.python
@@ -80,7 +80,7 @@ if(data.java)
     }
     if(data.sql)
     {
-        if(typeof Number(data.sql)!='number')
+        if(!Number(data.sql&& data.sql!=0))
         return res.status(400).send({status:false,message:"provide valid marks"})
         if(data.sql<0)  return res.status(400).send({status:false,message:"provide valid marks for sql"})
         subjects.sql=data.sql
@@ -99,8 +99,8 @@ console.log(subject)
 
 if(data.java)
     {
-        if(typeof Number(data.java)!='number')
-        return res.status(400).send({status:false,message:"provide valid marks"})
+        if(!Number(data.java)&& data.java!=0)
+        return res.status(400).send({status:false,message:"provide valid marks hello"})
         if(data.java<0)  return res.status(400).send({status:false,message:"provide valid marks for java"})
         if(!subject["java"])
         {
@@ -115,7 +115,7 @@ if(data.java)
 
     if(data.javaScript)
     {
-        if(typeof Number(data.javaScript)!='number')
+        if( !Number(data.javaScript)&& data.javaScript!=0)
         return res.status(400).send({status:false,message:"provide valid marks"})
         if(data.javaScript<0)  return res.status(400).send({status:false,message:"provide valid marks for javaScript"})
         
@@ -130,7 +130,7 @@ if(data.java)
     }
     if(data.mongoDb)
     {
-        if(typeof Number(data.mongoDb)!='number')
+        if( !Number(data.mongoDb)&& data.mongoDb!=0)
         return res.status(400).send({status:false,message:"provide valid marks"})
         if(data.mongoDb<0)  return res.status(400).send({status:false,message:"provide valid marks for mongoDb"})
         if(!subject["mongoDb"])
@@ -144,7 +144,7 @@ if(data.java)
     }
     if(data.python)
     {
-        if(typeof Number(data.python)!='number')
+        if( !Number(data.python)&& data.python!=0)
         return res.status(400).send({status:false,message:"provide valid marks"})
         if(data.python<0)  return res.status(400).send({status:false,message:"provide valid marks for python"})
         if(!subject["python"])
@@ -158,7 +158,7 @@ if(data.java)
     }
     if(data.sql)
     {
-        if(typeof Number(data.sql)!='number')
+        if( !Number(data.sql)&& data.sql!=0)
         return res.status(400).send({status:false,message:"provide valid marks"})
         if(data.sql<0)  return res.status(400).send({status:false,message:"provide valid marks for sql"})
         if(!subject["sql"])
@@ -172,6 +172,7 @@ if(data.java)
     }
     
     object.subjects=subject
+    object.isDeleted=false
 
 
      createData=await dataModel.findOneAndUpdate({roll:data.roll},object,{new:true})
@@ -188,8 +189,17 @@ if(data.java)
 }
 const editData=async (req,res)=>{
 try{
+console.log('we are here')
+console.log(req.body)
 
     let data=req.body;
+    let flag=false
+    for(key in data.subjects)
+    {
+        if(data.subjects[key].trim()!="") flag=true
+    }
+    if(!flag){
+     return res.status(400).send({status:false,message:"please pass some data to update"})}
     let userId=req.params.userId
     let obj={}
 
@@ -320,10 +330,14 @@ const deleteStudent=async(req,res)=>{
 let {userId,roll}=req.params;
 if(!roll) return res.status(400).send({status:false,message:"please provid roll"})
 if(!Number(roll)) return res.status(400).send({status:false,message:"please provid valid roll"})
-let deletestudent=await dataModel.findOneAndUpdate({userId:userId,roll,isDeleted:false},{isDeleted:true},{new:true})
+
+
+let obj={isDeleted:true,subjects:{}}
+
+let deletestudent=await dataModel.findOneAndUpdate({userId:userId,roll,isDeleted:false},obj,{new:true})
 
 if(!deletestudent) return res.status(404).send({status:false,message:"no student found"})
-return res.status(200).send({status:false,message:"student deleted successfully"})
+return res.status(200).send({status:true,message:"student deleted successfully"})
     }
     catch(err)
     {
@@ -335,6 +349,7 @@ return res.status(200).send({status:false,message:"student deleted successfully"
 const fetchData=async(req,res)=>{
 
 try{
+    
     let userId=req.params.userId;
      let data=await dataModel.find({userId:userId,isDeleted:false})
      if(data.length==0) return res.status(404).send({status:false,message:'no data available'})
@@ -346,7 +361,5 @@ catch(err)
     {
         return res.status(500).send({status:false,message:err.message})
     }
-
-
 }
 module.exports={createData,editData,view,deleteStudent,fetchData}
